@@ -13,7 +13,7 @@ export const registerUser = async (username, email, password) => {
 
 
   await createUser(username, email, password); 
-  // it will call to the db logic--------(repository function called createUser)   here i can't use hashing because it will be added in User constructor
+  // it will call to the db logic--------(repository function called createUser)   here i can't use hashing because it will be added in User constructor so that validation is also done
 };
 
 export const loginUser = async (email, password) => {

@@ -1,25 +1,47 @@
+// src/models/user.model.js
+import { DataTypes } from 'sequelize';
 import bcrypt from 'bcrypt';
-export class User{
-  constructor({id,name,email,password}){
 
-    console.log("User model constructor called with:", {id, name, email, password});
-   
-    if( !name || !email || !password){
-      throw new Error("All fields are required");
+export default (sequelize) => {
+  const User = sequelize.define('User', {
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: { msg: 'Name is required' },
+        notEmpty: { msg: 'Name cannot be empty' },
+      }
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: { msg: 'Invalid email format' },
+      }
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        len: {
+          args: [6],
+          msg: 'Password must be at least 6 characters long',
+        },
+      }
     }
-    if(!email.includes("@")){
-      throw new Error("Invalid email format");
+  }, {
+    tableName: 'users',
+    timestamps: false,
+    hooks: {
+      beforeCreate: async (user) => {
+        if (user.password) {
+          const hashed = await bcrypt.hash(user.password, 10);
+          user.password = hashed;
+        }
+      }
     }
-  if (typeof password !== 'string' || password.length < 6 ) {
-      throw new Error("Password must be at least 6 characters long");
-    }
+  });
 
-    this.id=id
-    this.name=name
-    this.email=email.toLowerCase();
-    const hashedPassword = bcrypt.hashSync(password, 10); 
-    this.password=hashedPassword;
-  }
-}
-
-
+  return User;
+};
